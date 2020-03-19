@@ -10,10 +10,13 @@
     "start": "parcel ./example/index.html"
   },
   "devDependencies": {
+    "@babel/core": "^7.8.7",
+    "@babel/preset-env": "^7.8.7",
     "parcel-bundler": "^1.12.4",
     "prettier": "^1.19.1"
   },
   "dependencies": {
+    "@babel/polyfill": "^7.8.7",
     "husky": "^4.2.3",
     "lint-staged": "^10.0.8"
   },

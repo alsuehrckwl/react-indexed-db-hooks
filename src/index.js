@@ -1,5 +1,7 @@
 import {indexedDB} from './indexedDB';
+import useIndexedDB from './useIndexedDB';
+import '@babel/polyfill';
 
-const test = new indexedDB();
-console.log('test = ', test);
-test.open('myTestDB');
+const test = useIndexedDB();
+
+test.createDatabase('ohMyGod').then(s => console.log(s));
