@@ -1,7 +1,6 @@
 export function indexedDB() {
   const db =
-    (typeof window !== 'undefined' && window) ||
-    window.indexedDB ||
+    (typeof window !== 'undefined' && window && window.indexedDB) ||
     window.mozIndexedDB ||
     window.webkitIndexedDB ||
     window.msIndexedDB;

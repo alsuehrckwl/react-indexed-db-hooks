@@ -6,6 +6,9 @@
   "repository": "https://github.com/alsuehrckwl/react-indexed-db-hooks.git",
   "author": "alsuehrckwl <alsuehrckwl@naver.com>",
   "license": "MIT",
+  "scripts": {
+    "start": "parcel ./example/index.html"
+  },
   "devDependencies": {
     "parcel-bundler": "^1.12.4",
     "prettier": "^1.19.1"
