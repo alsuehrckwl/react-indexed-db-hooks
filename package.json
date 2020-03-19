@@ -1,0 +1,17 @@
+{
+  "name": "react-indexed-db-hooks",
+  "version": "1.0.0",
+  "description": "WebAPI IndexedDB + react with hooks = 💖",
+  "main": "index.js",
+  "repository": "https://github.com/alsuehrckwl/react-indexed-db-hooks.git",
+  "author": "alsuehrckwl <alsuehrckwl@naver.com>",
+  "license": "MIT",
+  "devDependencies": {
+    "parcel-bundler": "^1.12.4",
+    "prettier": "^1.19.1"
+  },
+  "dependencies": {
+    "husky": "^4.2.3",
+    "lint-staged": "^10.0.8"
+  }
+}
