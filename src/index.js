@@ -4,4 +4,4 @@ import '@babel/polyfill';
 
 const test = useIndexedDB();
 
-test.createDatabase('ohMyGod').then(s => console.log(s));
+test.createDatabase('ohMyGod').success(s => console.log(s));
