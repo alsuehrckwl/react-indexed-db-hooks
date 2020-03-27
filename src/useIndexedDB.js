@@ -6,20 +6,46 @@ export default function useIndexedDB() {
   const createDatabase = databaseName => {
     const request = db.open(databaseName);
 
-    return {
-      success: () => {
-        request.onsuccess = function(event) {
-          console.log(event);
-          return event;
-        };
-      },
-      error: () => {
-        request.onerror = async function(event) {
-          return await event;
-        };
-      },
-    };
+    return new Promise((resolve, reject) => {
+      request.onsuccess = event => {
+        if (event.type === 'success') {
+          resolve(event.target.result);
+        }
+      };
+      request.onerror = event => {
+        reject(`IndexedDB create error : ${request.error}`);
+      };
+    });
   };
 
-  return {createDatabase};
+  const openDatabase = (databaseName, version = 1) => {
+    const request = db.open(databaseName, version);
+
+    return new Promise((resolve, reject) => {
+      request.onsuccess = event => {
+        resolve(request.result);
+      };
+      request.onerror = event => {
+        reject(`IndexedDB open error: ${request.error}`);
+      };
+    });
+  };
+
+  const createSchema = (databaseName, version = 1, schema) => {
+    const request = db.open(databaseName, version);
+
+    console.log(request);
+
+    request.onupgradeneeded = event => {
+      console.log(event);
+    };
+    // openDatabase(databaseName, version).then(res => {
+    //   res.onupgradeneeded = event => {
+    //     console.log(event)
+    //   };
+    //   // return res
+    // });
+  };
+
+  return {createDatabase, openDatabase, createSchema};
 }

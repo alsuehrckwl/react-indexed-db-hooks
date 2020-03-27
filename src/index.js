@@ -2,6 +2,6 @@ import {indexedDB} from './indexedDB';
 import useIndexedDB from './useIndexedDB';
 import '@babel/polyfill';
 
-const test = useIndexedDB();
+const {createDatabase, openDatabase, createSchema} = useIndexedDB();
 
-test.createDatabase('ohMyGod').success(s => console.log(s));
+createSchema('picksmatch', 2, 'soccer');
