@@ -1,4 +1,6 @@
 import {indexedDB} from './indexedDB';
+import {TRANSACTION_MODE} from './constans';
+import {checkDatabase} from './utils';
 
 export default function useIndexedDB() {
   const database = new indexedDB();
@@ -71,7 +73,197 @@ export default function useIndexedDB() {
     });
   };
 
-  const transactions = databaseName => {};
+  const transactions = {
+    insert: (databaseName, schema, data) => {
+      return new Promise((resolve, reject) => {
+        openDatabase(databaseName).then(success => {
+          const db = success.result;
+          const transaction = db
+            .transaction(schema, TRANSACTION_MODE.readwrite)
+            .objectStore(schema);
+          const request = transaction.add(data);
 
-  return {createDatabase, openDatabase, createSchema};
+          request.onsuccess = event => {
+            resolve(event.target.result);
+            db.close();
+          };
+
+          request.onerror = event => {
+            reject(event.target.error);
+            db.close();
+          };
+        });
+      });
+    },
+    findById: (databaseName, schema, id) => {
+      return new Promise((resolve, reject) => {
+        openDatabase(databaseName).then(success => {
+          const db = success.result;
+          const validation = checkDatabase(db, schema);
+
+          if (validation.check) {
+            reject(validation.msg);
+          }
+
+          const transaction = db
+            .transaction(schema, TRANSACTION_MODE.readonly)
+            .objectStore(schema);
+          const request = transaction.get(+id);
+
+          request.onsuccess = event => {
+            resolve(event.target.result);
+            db.close();
+          };
+
+          request.onerror = event => {
+            reject(event.target.error);
+            db.close();
+          };
+        });
+      });
+    },
+    findByKey: (databaseName, schema, index, value) => {
+      return new Promise((resolve, reject) => {
+        openDatabase(databaseName).then(success => {
+          const db = success.result;
+          const validation = checkDatabase(db, schema);
+
+          if (validation.check) {
+            reject(validation.msg);
+          }
+
+          const transaction = db
+            .transaction(schema, TRANSACTION_MODE.readonly)
+            .objectStore(schema);
+          const transactionIndex = transaction.index(index);
+          const request = transactionIndex.getKey(value);
+
+          request.onsuccess = event => {
+            resolve(event.target.result);
+            db.close();
+          };
+
+          request.onerror = event => {
+            reject(event.target.error);
+            db.close();
+          };
+        });
+      });
+    },
+    findByValue: (databaseName, schema, index, value) => {
+      return new Promise((resolve, reject) => {
+        openDatabase(databaseName).then(success => {
+          const db = success.result;
+          const validation = checkDatabase(db, schema);
+
+          if (validation.check) {
+            reject(validation.msg);
+          }
+
+          const transaction = db
+            .transaction(schema, TRANSACTION_MODE.readonly)
+            .objectStore(schema);
+          const transactionIndex = transaction.index(index);
+          const request = transactionIndex.get(value);
+
+          request.onsuccess = event => {
+            resolve(event.target.result);
+            db.close();
+          };
+
+          request.onerror = event => {
+            reject(event.target.error);
+            db.close();
+          };
+        });
+      });
+    },
+    findAll: (databaseName, schema) => {
+      return new Promise((resolve, reject) => {
+        openDatabase(databaseName).then(success => {
+          const db = success.result;
+          const validation = checkDatabase(db, schema);
+
+          if (validation.check) {
+            reject(validation.msg);
+          }
+
+          const transaction = db
+            .transaction(schema, TRANSACTION_MODE.readonly)
+            .objectStore(schema);
+          const request = transaction.getAll();
+
+          request.onsuccess = event => {
+            resolve(event.target.result);
+            db.close();
+          };
+
+          request.onerror = event => {
+            reject(event.target.error);
+            db.close();
+          };
+        });
+      });
+    },
+    findAllKeys: (databaseName, schema) => {
+      return new Promise((resolve, reject) => {
+        openDatabase(databaseName).then(success => {
+          const db = success.result;
+          const validation = checkDatabase(db, schema);
+
+          if (validation.check) {
+            reject(validation.msg);
+          }
+
+          const transaction = db
+            .transaction(schema, TRANSACTION_MODE.readonly)
+            .objectStore(schema);
+          const request = transaction.getAllKeys();
+
+          request.onsuccess = event => {
+            resolve(event.target.result);
+            db.close();
+          };
+
+          request.onerror = event => {
+            reject(event.target.error);
+            db.close();
+          };
+        });
+      });
+    },
+    count: (databaseName, schema) => {
+      return new Promise((resolve, reject) => {
+        openDatabase(databaseName).then(success => {
+          const db = success.result;
+          const validation = checkDatabase(db, schema);
+
+          if (validation.check) {
+            reject(validation.msg);
+          }
+
+          const transaction = db
+            .transaction(schema, TRANSACTION_MODE.readonly)
+            .objectStore(schema);
+          const request = transaction.count();
+
+          request.onsuccess = event => {
+            resolve(event.target.result);
+            db.close();
+          };
+
+          request.onerror = event => {
+            reject(event.target.error);
+            db.close();
+          };
+        });
+      });
+    },
+    updateById: () => {},
+    deleteByKey: () => {},
+    clear: () => {},
+    openCursor: () => {},
+  };
+
+  return {createDatabase, openDatabase, createSchema, ...transactions};
 }
