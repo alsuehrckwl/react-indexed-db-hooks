@@ -1,5 +1,5 @@
 import {indexedDB} from './indexedDB';
-import {TRANSACTION_MODE} from './constans';
+import {TRANSACTION_MODE} from './constants';
 import {checkDatabase} from './utils';
 
 export default function useIndexedDB() {
