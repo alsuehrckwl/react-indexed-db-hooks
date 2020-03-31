@@ -1,10 +1,10 @@
 import {indexedDB} from './indexedDB';
 
 export default function useIndexedDB() {
-  const db = new indexedDB();
+  const database = new indexedDB();
 
   const createDatabase = databaseName => {
-    const request = db.open(databaseName);
+    const request = database.open(databaseName);
 
     return new Promise((resolve, reject) => {
       request.onsuccess = event => {
@@ -19,11 +19,11 @@ export default function useIndexedDB() {
   };
 
   const openDatabase = (databaseName, version = 1) => {
-    const request = db.open(databaseName, version);
+    const request = database.open(databaseName);
 
     return new Promise((resolve, reject) => {
       request.onsuccess = event => {
-        resolve(request.result);
+        resolve({result: request.result, event: event});
       };
       request.onerror = event => {
         reject(`IndexedDB open error: ${request.error}`);
@@ -31,21 +31,47 @@ export default function useIndexedDB() {
     });
   };
 
-  const createSchema = (databaseName, version = 1, schema) => {
-    const request = db.open(databaseName, version);
+  const createSchema = (databaseName, metas) => {
+    const request = openDatabase(databaseName);
 
-    console.log(request);
+    request.then(success => {
+      success.result.close();
 
-    request.onupgradeneeded = event => {
-      console.log(event);
-    };
-    // openDatabase(databaseName, version).then(res => {
-    //   res.onupgradeneeded = event => {
-    //     console.log(event)
-    //   };
-    //   // return res
-    // });
+      const newVersion = database.open(
+        databaseName,
+        success.result.version + 1,
+      );
+
+      newVersion.onupgradeneeded = event => {
+        const db = event.target.result;
+
+        metas.forEach(meta => {
+          if (!db.objectStoreNames.contains(meta.schema)) {
+            const objectStore = db.createObjectStore(
+              meta.schema,
+              meta.autoIncrement,
+            );
+
+            meta.indexes.forEach(index => {
+              objectStore.createIndex(index.name, index.keypath, index.options);
+            });
+          }
+        });
+      };
+
+      newVersion.onsuccess = event => {
+        const db = event.target.result;
+        db.close();
+      };
+
+      newVersion.onerror = event => {
+        const db = event.target.result;
+        db.close();
+      };
+    });
   };
+
+  const transactions = databaseName => {};
 
   return {createDatabase, openDatabase, createSchema};
 }

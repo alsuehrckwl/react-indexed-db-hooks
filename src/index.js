@@ -4,4 +4,14 @@ import '@babel/polyfill';
 
 const {createDatabase, openDatabase, createSchema} = useIndexedDB();
 
-createSchema('picksmatch', 2, 'soccer');
+// openDatabase('picksmatch').then(res => console.log(res)).catch(e => console.log(e))
+createSchema('picksmatch', [
+  {
+    schema: 'soccerFavorite',
+    autoIncrement: {keyPath: 'id', autoIncrement: true},
+    indexes: [
+      {name: 'gameId', keypath: 'gameId', options: {unique: true}},
+      {name: 'date', keypath: 'date', options: {unique: false}},
+    ],
+  },
+]);
