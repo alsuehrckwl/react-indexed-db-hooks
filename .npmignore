@@ -1,0 +1,8 @@
+.cache
+.vscode
+development
+dist
+src
+example
+.prettierrc
+.babelrc
