@@ -1,6 +1,6 @@
 <br/>
 <br/>
-<h2 align="center">React indexedDB Hooks</h2>
+<h3 align="center">React indexedDB Hooks</h3>
 <h3 align="center">WebAPI IndexedDB + react with hooks = 💖</h3>
 <br/>
 
