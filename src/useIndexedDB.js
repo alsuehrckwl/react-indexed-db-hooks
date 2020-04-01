@@ -259,8 +259,71 @@ export default function useIndexedDB() {
         });
       });
     },
-    updateById: () => {},
-    deleteByKey: () => {},
+    update: (databaseName, schema, data) => {
+      return new Promise((resolve, reject) => {
+        openDatabase(databaseName).then(success => {
+          const db = success.result;
+          const validation = checkDatabase(db, schema);
+
+          if (validation.check) {
+            reject(validation.msg);
+          }
+
+          const transaction = db
+            .transaction(schema, TRANSACTION_MODE.readwrite)
+            .objectStore(schema)
+            .put(data);
+
+          transaction.onsuccess = event => {
+            resolve(event.target.result);
+            db.close();
+          };
+
+          transaction.onerror = event => {
+            reject(event.target.error);
+            db.close();
+          };
+        });
+      });
+    },
+    deleteByKey: (databaseName, schema, index, value) => {
+      return new Promise((resolve, reject) => {
+        openDatabase(databaseName).then(success => {
+          const db = success.result;
+          const validation = checkDatabase(db, schema);
+
+          if (validation.check) {
+            reject(validation.msg);
+          }
+
+          const transaction = db
+            .transaction(schema, TRANSACTION_MODE.readwrite)
+            .objectStore(schema);
+          const transactionIndex = transaction.index(index);
+          const request = transactionIndex.getKey(value);
+
+          request.onsuccess = event => {
+            const key = event.target.result;
+            const deleteRequest = transaction.delete(key);
+
+            deleteRequest.onsuccess = event => {
+              resolve(event.target.result);
+              db.close();
+            };
+
+            deleteRequest.onerror = event => {
+              reject(event.target.error);
+              db.close();
+            };
+          };
+
+          request.onerror = event => {
+            reject(event.target.error);
+            db.close();
+          };
+        });
+      });
+    },
     clear: () => {},
     openCursor: () => {},
   };
