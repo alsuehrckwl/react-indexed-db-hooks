@@ -3,7 +3,10 @@
   "version": "1.0.1",
   "description": "WebAPI IndexedDB + react with hooks = 💖",
   "main": "lib/index.js",
-  "files": ["lib/*", "src/*"],
+  "files": [
+    "lib/*",
+    "src/*"
+  ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/alsuehrckwl/react-indexed-db-hooks.git"
@@ -12,6 +15,7 @@
   "license": "MIT",
   "scripts": {
     "start": "parcel ./example/index.html --out-dir developement",
+    "test": "echo \"No test specified\"",
     "build": "parcel build ./src/index.js --out-dir lib"
   },
   "devDependencies": {
