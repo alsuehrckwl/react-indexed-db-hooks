@@ -4,8 +4,7 @@
   "description": "WebAPI IndexedDB + react with hooks = 💖",
   "main": "lib/index.js",
   "files": [
-    "lib/*",
-    "src/*"
+    "lib/*"
   ],
   "repository": {
     "type": "git",
@@ -14,7 +13,7 @@
   "author": "alsuehrckwl <alsuehrckwl@naver.com>",
   "license": "MIT",
   "scripts": {
-    "start": "parcel ./example/index.html --out-dir developement",
+    "start": "parcel ./example/index.html --out-dir development",
     "test": "echo \"No test specified\"",
     "build": "parcel build ./src/index.js --out-dir lib"
   },
