@@ -1,6 +1,7 @@
-<h3 align="center">React indexedDB Hooks</h3>
+<h1 align="center">React indexedDB Hooks</h1>
+<h3 align="center">WebAPI IndexedDB + react with hooks = 💖</h3>
 
-# 
+## 
 
 ## Install
 
