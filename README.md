@@ -132,7 +132,6 @@ deleteByKey('db', 'user', 'phone', '010-0000-0000')
 - cursor
 - index
 - react context, consumer
-- select component
-- mutation component
+- crud component
 - error, abort, loading, success
 
