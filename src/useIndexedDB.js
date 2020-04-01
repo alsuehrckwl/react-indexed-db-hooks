@@ -2,7 +2,7 @@ import {indexedDB} from './indexedDB';
 import {TRANSACTION_MODE} from './constants';
 import {checkDatabase} from './utils';
 
-export default function useIndexedDB() {
+export function useIndexedDB() {
   const database = new indexedDB();
 
   const createDatabase = databaseName => {
