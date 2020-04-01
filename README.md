@@ -107,7 +107,7 @@ count('db', 'user')
 
 update :
 ```
-update('db', 'user' {
+update('db', 'user', {
   name: 'kims-acount', 
   phone: '010-0000-0000',
   id: 1,
