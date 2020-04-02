@@ -14,6 +14,9 @@ Several quick start options are available:
 - Install with [npm](https://www.npmjs.com/): `npm install react-indexed-db-hooks`
 - Install with [yarn](https://yarnpkg.com/): `yarn add react-indexed-db-hooks`
 
+## reqirement
+- Need a higher react 16.8 version
+
 ## How to use
 - Project root init provide IndexedDBProvider.
 - Init initialState in databaseName, version
