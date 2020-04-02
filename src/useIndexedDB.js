@@ -34,23 +34,20 @@ export function useIndexedDB() {
     });
   };
 
-  const createSchema = metas => {
-    const request = openDatabase();
-
-    request.then(success => {
-      success.result.close();
-
+  const createSchema = (metas, version) => {
+    return new Promise((resolve, reject) => {
+      const updateVersion = version + 1;
       const newVersion = state.indexedDB.open(
         state.databaseName,
-        success.result.version + 1,
+        updateVersion,
       );
 
       newVersion.onupgradeneeded = event => {
         const db = event.target.result;
 
-        metas.forEach(meta => {
+        metas.forEach(async meta => {
           if (!db.objectStoreNames.contains(meta.schema)) {
-            const objectStore = db.createObjectStore(
+            const objectStore = await db.createObjectStore(
               meta.schema,
               meta.autoIncrement,
             );
@@ -63,13 +60,11 @@ export function useIndexedDB() {
       };
 
       newVersion.onsuccess = event => {
-        const db = event.target.result;
-        db.close();
+        resolve(event.target.result);
       };
 
       newVersion.onerror = event => {
-        const db = event.target.result;
-        db.close();
+        reject(event.target.result);
       };
     });
   };

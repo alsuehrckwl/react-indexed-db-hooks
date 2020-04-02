@@ -9,20 +9,33 @@ export function InitDatabase(props) {
 
   useEffect(() => {
     openDatabase().then(success => {
+      const version = success.result.version;
+
       dispatch({
         type: 'updateVersion',
-        version: success.result.version,
+        version: version,
       });
 
-      if (!state.db) {
-        dispatch({
-          type: 'initDatabase',
-          db: success.result,
-        });
-      }
-
       if (success.result.objectStoreNames.length === 0) {
-        createSchema(state.schemas);
+        createSchema(state.schemas, version)
+          .then(success => {
+            if (!state.db) {
+              dispatch({
+                type: 'initDatabase',
+                db: success.result,
+              });
+            }
+          })
+          .catch(error => {
+            console.log(error);
+          });
+      } else {
+        if (!state.db) {
+          dispatch({
+            type: 'initDatabase',
+            db: success.result,
+          });
+        }
       }
     });
   }, []);
