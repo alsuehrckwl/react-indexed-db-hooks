@@ -1,6 +1,6 @@
 <br/>
 <br/>
-<h2 align="center">React indexedDB Hooks</h2>
+<h3 align="center">React indexedDB Hooks</h3>
 <h3 align="center">WebAPI IndexedDB + react with hooks = 💖</h3>
 <br/>
 
@@ -142,7 +142,11 @@ deleteByKey('info', 'phone', '010-0000-0000')
 - cursor
 - index
 - react context, consumer
+<<<<<<< HEAD
 - Query
 - Mutation
+=======
+- crud component
+>>>>>>> 63d891169e47da023a49393dcf6e3cac0f95ec4c
 - error, abort, loading, success
 
