@@ -1,6 +1,6 @@
 {
   "name": "react-indexed-db-hooks",
-  "version": "1.0.11",
+  "version": "1.0.12",
   "description": "WebAPI IndexedDB + react with hooks = 💖",
   "main": "lib/index.js",
   "module": "lib/index.js",
@@ -16,8 +16,8 @@
   "scripts": {
     "start": "parcel ./example/index.html --out-dir development",
     "test": "echo \"No test specified\"",
-    "build": "rollup -c",
-    "publish": "npm run build && npm version patch && npm publish"
+    "rollup": "rollup -c",
+    "build": "npm run rollup && npm version patch && npm publish"
   },
   "devDependencies": {
     "@babel/core": "^7.9.0",
