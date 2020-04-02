@@ -36,13 +36,16 @@ export function useIndexedDB() {
 
   const createSchema = (metas, version) => {
     return new Promise((resolve, reject) => {
-      const updateVersion = version + 1;
-      const newVersion = state.indexedDB.open(
-        state.databaseName,
-        updateVersion,
-      );
+      const request = state.indexedDB.open(state.databaseName, version);
 
-      newVersion.onupgradeneeded = event => {
+      request.onsuccess = event => {
+        resolve(event.target.result);
+      };
+      request.onerror = event => {
+        reject(`IndexedDB open error: ${request.error}`);
+      };
+
+      request.onupgradeneeded = event => {
         const db = event.target.result;
 
         metas.forEach(meta => {
@@ -57,14 +60,6 @@ export function useIndexedDB() {
             });
           }
         });
-      };
-
-      newVersion.onsuccess = event => {
-        resolve(event.target.result);
-      };
-
-      newVersion.onerror = event => {
-        reject(event.target.result);
       };
     });
   };

@@ -5,39 +5,25 @@ import {useIndexedDB} from './useIndexedDB';
 export function InitDatabase(props) {
   const [isInit, setInit] = useState(false);
   const [state, dispatch] = IndexedDBStateValue(IndexedDBContext);
-  const {openDatabase, createSchema} = useIndexedDB();
+  const {createSchema} = useIndexedDB();
 
   useEffect(() => {
-    openDatabase().then(success => {
-      const version = success.result.version;
-
-      dispatch({
-        type: 'updateVersion',
-        version: version,
-      });
-
-      if (success.result.objectStoreNames.length === 0) {
-        createSchema(state.schemas, version)
-          .then(success => {
-            if (!state.db) {
-              dispatch({
-                type: 'initDatabase',
-                db: success.result,
-              });
-            }
-          })
-          .catch(error => {
-            console.log(error);
-          });
-      } else {
+    createSchema(state.schemas, state.version)
+      .then(success => {
         if (!state.db) {
           dispatch({
             type: 'initDatabase',
-            db: success.result,
+            db: success,
+          });
+          dispatch({
+            type: 'updateVersion',
+            version: success.version,
           });
         }
-      }
-    });
+      })
+      .catch(error => {
+        console.log(error);
+      });
   }, []);
 
   useEffect(() => {
