@@ -27,7 +27,6 @@
     "rollup-plugin-babel": "^4.4.0"
   },
   "dependencies": {
-    "@babel/polyfill": "^7.8.7",
     "husky": "^4.2.3",
     "lint-staged": "^10.0.8"
   },
@@ -41,5 +40,9 @@
       "prettier --write",
       "git add"
     ]
+  },
+  "peerDependencies": {
+    "react": "^16.13.1",
+    "react-dom": "^16.13.1"
   }
 }

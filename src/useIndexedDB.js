@@ -1,12 +1,13 @@
-import {indexedDB} from './indexedDB';
+import React from 'react';
 import {TRANSACTION_MODE} from './constants';
 import {checkDatabase} from './utils';
+import {IndexedDBContext, IndexedDBStateValue} from './indexedDBProvider';
 
 export function useIndexedDB() {
-  const database = new indexedDB();
+  const [state] = IndexedDBStateValue(IndexedDBContext);
 
-  const createDatabase = databaseName => {
-    const request = database.open(databaseName);
+  const createDatabase = () => {
+    const request = indexedDB.open(state.databaseName);
 
     return new Promise((resolve, reject) => {
       request.onsuccess = event => {
@@ -20,8 +21,8 @@ export function useIndexedDB() {
     });
   };
 
-  const openDatabase = (databaseName, version = 1) => {
-    const request = database.open(databaseName);
+  const openDatabase = (version = 1) => {
+    const request = state.indexedDB.open(state.databaseName);
 
     return new Promise((resolve, reject) => {
       request.onsuccess = event => {
@@ -33,14 +34,14 @@ export function useIndexedDB() {
     });
   };
 
-  const createSchema = (databaseName, metas) => {
-    const request = openDatabase(databaseName);
+  const createSchema = metas => {
+    const request = openDatabase();
 
     request.then(success => {
       success.result.close();
 
-      const newVersion = database.open(
-        databaseName,
+      const newVersion = state.indexedDB.open(
+        state.databaseName,
         success.result.version + 1,
       );
 
@@ -74,259 +75,231 @@ export function useIndexedDB() {
   };
 
   const transactions = {
-    insert: (databaseName, schema, data) => {
+    insert: (schema, data) => {
       return new Promise((resolve, reject) => {
-        openDatabase(databaseName).then(success => {
-          const db = success.result;
-          const transaction = db
-            .transaction(schema, TRANSACTION_MODE.readwrite)
-            .objectStore(schema);
-          const request = transaction.add(data);
+        const transaction = state.db
+          .transaction(schema, TRANSACTION_MODE.readwrite)
+          .objectStore(schema);
+        const request = transaction.add(data);
 
-          request.onsuccess = event => {
-            resolve(event.target.result);
-            db.close();
-          };
+        request.onsuccess = event => {
+          resolve(true);
+        };
 
-          request.onerror = event => {
-            reject(event.target.error);
-            db.close();
-          };
-        });
+        request.onerror = event => {
+          reject(event.target.error);
+        };
       });
     },
-    findById: (databaseName, schema, id) => {
+    findById: (schema, id) => {
       return new Promise((resolve, reject) => {
-        openDatabase(databaseName).then(success => {
-          const db = success.result;
-          const validation = checkDatabase(db, schema);
+        const validation = checkDatabase(state.db, schema);
 
-          if (validation.check) {
-            reject(validation.msg);
-          }
+        if (validation.check) {
+          reject(validation.msg);
+        }
 
-          const transaction = db
-            .transaction(schema, TRANSACTION_MODE.readonly)
-            .objectStore(schema);
-          const request = transaction.get(+id);
+        const transaction = state.db
+          .transaction(schema, TRANSACTION_MODE.readonly)
+          .objectStore(schema);
+        const request = transaction.get(+id);
 
-          request.onsuccess = event => {
+        request.onsuccess = event => {
+          if (event.target.result === undefined) {
+            reject(`${schema} id ${id} is undefined`);
+          } else {
             resolve(event.target.result);
-            db.close();
-          };
+          }
+        };
 
-          request.onerror = event => {
-            reject(event.target.error);
-            db.close();
-          };
-        });
+        request.onerror = event => {
+          reject(event.target.error);
+        };
       });
     },
-    findByKey: (databaseName, schema, index, value) => {
+    findByKey: (schema, index, value) => {
       return new Promise((resolve, reject) => {
-        openDatabase(databaseName).then(success => {
-          const db = success.result;
-          const validation = checkDatabase(db, schema);
+        const validation = checkDatabase(state.db, schema);
 
-          if (validation.check) {
-            reject(validation.msg);
-          }
+        if (validation.check) {
+          reject(validation.msg);
+        }
 
-          const transaction = db
-            .transaction(schema, TRANSACTION_MODE.readonly)
-            .objectStore(schema);
-          const transactionIndex = transaction.index(index);
-          const request = transactionIndex.getKey(value);
+        const transaction = state.db
+          .transaction(schema, TRANSACTION_MODE.readonly)
+          .objectStore(schema);
+        const transactionIndex = transaction.index(index);
+        const request = transactionIndex.getKey(value);
 
-          request.onsuccess = event => {
+        request.onsuccess = event => {
+          if (event.target.result === undefined) {
+            reject(`${schema} index: ${index} - ${value} is undefined`);
+          } else {
             resolve(event.target.result);
-            db.close();
-          };
+          }
+        };
 
-          request.onerror = event => {
-            reject(event.target.error);
-            db.close();
-          };
-        });
+        request.onerror = event => {
+          reject(event.target.error);
+        };
       });
     },
-    findByValue: (databaseName, schema, index, value) => {
+    findByValue: (schema, index, value) => {
       return new Promise((resolve, reject) => {
-        openDatabase(databaseName).then(success => {
-          const db = success.result;
-          const validation = checkDatabase(db, schema);
+        const validation = checkDatabase(state.db, schema);
 
-          if (validation.check) {
-            reject(validation.msg);
-          }
+        if (validation.check) {
+          reject(validation.msg);
+        }
 
-          const transaction = db
-            .transaction(schema, TRANSACTION_MODE.readonly)
-            .objectStore(schema);
-          const transactionIndex = transaction.index(index);
-          const request = transactionIndex.get(value);
+        const transaction = state.db
+          .transaction(schema, TRANSACTION_MODE.readonly)
+          .objectStore(schema);
+        const transactionIndex = transaction.index(index);
+        const request = transactionIndex.get(value);
 
-          request.onsuccess = event => {
+        request.onsuccess = event => {
+          if (event.target.result === undefined) {
+            reject(`${schema} index: ${index} - ${value} is undefined`);
+          } else {
             resolve(event.target.result);
-            db.close();
-          };
+          }
+        };
 
-          request.onerror = event => {
-            reject(event.target.error);
-            db.close();
-          };
-        });
+        request.onerror = event => {
+          reject(event.target.error);
+        };
       });
     },
-    findAll: (databaseName, schema) => {
+    findAll: schema => {
       return new Promise((resolve, reject) => {
-        openDatabase(databaseName).then(success => {
-          const db = success.result;
-          const validation = checkDatabase(db, schema);
+        const validation = checkDatabase(state.db, schema);
 
-          if (validation.check) {
-            reject(validation.msg);
-          }
+        if (validation.check) {
+          reject(validation.msg);
+        }
 
-          const transaction = db
-            .transaction(schema, TRANSACTION_MODE.readonly)
-            .objectStore(schema);
-          const request = transaction.getAll();
+        const transaction = state.db
+          .transaction(schema, TRANSACTION_MODE.readonly)
+          .objectStore(schema);
+        const request = transaction.getAll();
 
-          request.onsuccess = event => {
-            resolve(event.target.result);
-            db.close();
-          };
+        request.onsuccess = event => {
+          resolve(event.target.result);
+        };
 
-          request.onerror = event => {
-            reject(event.target.error);
-            db.close();
-          };
-        });
+        request.onerror = event => {
+          reject(event.target.error);
+        };
       });
     },
-    findAllKeys: (databaseName, schema) => {
+    findAllKeys: schema => {
       return new Promise((resolve, reject) => {
-        openDatabase(databaseName).then(success => {
-          const db = success.result;
-          const validation = checkDatabase(db, schema);
+        const validation = checkDatabase(state.db, schema);
 
-          if (validation.check) {
-            reject(validation.msg);
-          }
+        if (validation.check) {
+          reject(validation.msg);
+        }
 
-          const transaction = db
-            .transaction(schema, TRANSACTION_MODE.readonly)
-            .objectStore(schema);
-          const request = transaction.getAllKeys();
+        const transaction = state.db
+          .transaction(schema, TRANSACTION_MODE.readonly)
+          .objectStore(schema);
+        const request = transaction.getAllKeys();
 
-          request.onsuccess = event => {
-            resolve(event.target.result);
-            db.close();
-          };
+        request.onsuccess = event => {
+          resolve(event.target.result);
+        };
 
-          request.onerror = event => {
-            reject(event.target.error);
-            db.close();
-          };
-        });
+        request.onerror = event => {
+          reject(event.target.error);
+        };
       });
     },
-    count: (databaseName, schema) => {
+    count: schema => {
       return new Promise((resolve, reject) => {
-        openDatabase(databaseName).then(success => {
-          const db = success.result;
-          const validation = checkDatabase(db, schema);
+        const validation = checkDatabase(state.db, schema);
 
-          if (validation.check) {
-            reject(validation.msg);
-          }
+        if (validation.check) {
+          reject(validation.msg);
+        }
 
-          const transaction = db
-            .transaction(schema, TRANSACTION_MODE.readonly)
-            .objectStore(schema);
-          const request = transaction.count();
+        const transaction = state.db
+          .transaction(schema, TRANSACTION_MODE.readonly)
+          .objectStore(schema);
+        const request = transaction.count();
 
-          request.onsuccess = event => {
-            resolve(event.target.result);
-            db.close();
-          };
+        request.onsuccess = event => {
+          resolve(event.target.result);
+        };
 
-          request.onerror = event => {
-            reject(event.target.error);
-            db.close();
-          };
-        });
+        request.onerror = event => {
+          reject(event.target.error);
+        };
       });
     },
-    update: (databaseName, schema, data) => {
+    update: (schema, data) => {
       return new Promise((resolve, reject) => {
-        openDatabase(databaseName).then(success => {
-          const db = success.result;
-          const validation = checkDatabase(db, schema);
+        const validation = checkDatabase(state.db, schema);
 
-          if (validation.check) {
-            reject(validation.msg);
-          }
+        if (validation.check) {
+          reject(validation.msg);
+        }
 
-          const transaction = db
-            .transaction(schema, TRANSACTION_MODE.readwrite)
-            .objectStore(schema)
-            .put(data);
+        const transaction = state.db
+          .transaction(schema, TRANSACTION_MODE.readwrite)
+          .objectStore(schema)
+          .put(data);
 
-          transaction.onsuccess = event => {
-            resolve(event.target.result);
-            db.close();
-          };
+        transaction.onsuccess = event => {
+          resolve(event.target.result);
+        };
 
-          transaction.onerror = event => {
-            reject(event.target.error);
-            db.close();
-          };
-        });
+        transaction.onerror = event => {
+          reject(event.target.error);
+        };
       });
     },
-    deleteByKey: (databaseName, schema, index, value) => {
+    deleteByKey: (schema, index, value) => {
       return new Promise((resolve, reject) => {
-        openDatabase(databaseName).then(success => {
-          const db = success.result;
-          const validation = checkDatabase(db, schema);
+        const validation = checkDatabase(state.db, schema);
 
-          if (validation.check) {
-            reject(validation.msg);
+        if (validation.check) {
+          reject(validation.msg);
+        }
+
+        const transaction = state.db
+          .transaction(schema, TRANSACTION_MODE.readwrite)
+          .objectStore(schema);
+        const transactionIndex = transaction.index(index);
+        const request = transactionIndex.getKey(value);
+
+        request.onsuccess = event => {
+          const key = event.target.result;
+
+          if (key === undefined) {
+            reject(`${schema} index: ${index} - ${value} is undefined`);
+            return;
           }
 
-          const transaction = db
-            .transaction(schema, TRANSACTION_MODE.readwrite)
-            .objectStore(schema);
-          const transactionIndex = transaction.index(index);
-          const request = transactionIndex.getKey(value);
+          const deleteRequest = transaction.delete(key);
 
-          request.onsuccess = event => {
-            const key = event.target.result;
-            const deleteRequest = transaction.delete(key);
-
-            deleteRequest.onsuccess = event => {
-              resolve(event.target.result);
-              db.close();
-            };
-
-            deleteRequest.onerror = event => {
-              reject(event.target.error);
-              db.close();
-            };
+          deleteRequest.onsuccess = event => {
+            resolve(true);
           };
 
-          request.onerror = event => {
+          deleteRequest.onerror = event => {
             reject(event.target.error);
-            db.close();
           };
-        });
+        };
+
+        request.onerror = event => {
+          reject(event.target.error);
+        };
       });
     },
     clear: () => {},
     openCursor: () => {},
   };
 
-  return {createDatabase, openDatabase, createSchema, ...transactions};
+  return {openDatabase, createSchema, ...transactions};
 }

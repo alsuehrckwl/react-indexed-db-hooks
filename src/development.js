@@ -1,82 +1,104 @@
-import {indexedDB} from './indexedDB';
-import useIndexedDB from './useIndexedDB';
-import '@babel/polyfill';
+import React from 'react';
+import ReactDOM from 'react-dom';
+import {useIndexedDB} from './useIndexedDB';
+import {IndexedDBProvider, IndexedDBReducer} from './indexedDBProvider';
 
-// count: ƒ count()
-// openCursor: ƒ openCursor()
-// openKeyCursor: ƒ openKeyCursor()
-// index: ƒ index()
-// createIndex: ƒ createIndex()
-// deleteIndex: ƒ deleteIndex()
+const Root = () => {
+  return (
+    <IndexedDBProvider
+      initialState={{
+        databaseName: 'user',
+        version: 1,
+        schemas: [
+          {
+            schema: 'info',
+            autoIncrement: {keyPath: 'id', autoIncrement: true},
+            indexes: [
+              {name: 'name', keypath: 'name', options: {unique: false}},
+              {name: 'phone', keypath: 'phone', options: {unique: true}},
+            ],
+          },
+          {
+            schema: 'auth',
+            autoIncrement: {keyPath: 'id', autoIncrement: true},
+            indexes: [
+              {name: 'userId', keypath: 'userId', options: {unique: true}},
+              {name: 'password', keypath: 'password', options: {unique: false}},
+            ],
+          },
+        ],
+      }}
+      reducer={IndexedDBReducer}
+    >
+      <Users />
+    </IndexedDBProvider>
+  );
+};
 
-const {
-  createDatabase,
-  openDatabase,
-  createSchema,
-  insert,
-  findById,
-  findByKey,
-  findByValue,
-  findAll,
-  findAllKeys,
-  count,
-  update,
-  deleteByKey,
-} = useIndexedDB();
+const Users = () => {
+  const {
+    createSchema,
+    insert,
+    findById,
+    findByKey,
+    findByValue,
+    findAll,
+    findAllKeys,
+    count,
+    update,
+    deleteByKey,
+  } = useIndexedDB();
 
-// openDatabase('db')
-//   .then(success => alert('database open success !'))
-//   .catch(e => alert('db does not exit..'))
+  // count: ƒ count()
+  // openCursor: ƒ openCursor()
+  // openKeyCursor: ƒ openKeyCursor()
+  // index: ƒ index()
+  // createIndex: ƒ createIndex()
+  // deleteIndex: ƒ deleteIndex()
 
-// createSchema('db', [
-//   {
-//     schema: 'user',
-//     autoIncrement: {keyPath: 'id', autoIncrement: true},
-//     indexes: [
-//       {name: 'name', keypath: 'name', options: {unique: false}},
-//       {name: 'phone', keypath: 'phone', options: {unique: true}},
-//     ],
-//   },
-// ])
-//   .then(success => alert('user create success !'))
-//   .catch(e => alert('oops! error..'));
+  // insert('info', {name: 'Hudson', phone: '010-1111-1111' })
+  //   .then(success => {
+  //     consolel.log('success = ', success)
+  //   })
+  //   .catch(error => alert(error));
 
-// insert('db', 'user', {name: 'kim', phone: '010-0000-0000' })
-//   .then(success => alert('success = {id: 1, name: kim , phone: 010-0000-0000 }'))
-//   .catch(error => alert('user does not exit'));
+  // findById('info', 3)
+  //   .then(success => console.log('success = ', success))
+  //   .catch(error => alert(error));
 
-// findById('db', 'user', 1)
-//   .then(success => alert('success = {id: 1, name: kim , phone: 010-0000-0000 }'))
-//   .catch(error => alert('user does not exit'));
+  // findByKey('info', 'phone', '010-0000-0000')
+  //   .then(success => console.log('success = ', success))
+  //   .catch(error => alert(error));
 
-// findByKey('db', 'user', 'phone', '010-0000-0000')
-//   .then(success => alert('success = 1')
-//   .catch(error => alert('user does not exit'));
+  // findByValue('info', 'phone', '010-0000-0000')
+  //   .then(success => console.log('success = ', success))
+  //   .catch(error => alert(error));
 
-// findByValue('db', 'user', 'phone', '010-0000-0000')
-//   .then(success => alert('success = {id: 1, name: kim , phone: 010-0000-0000 }'))
-//   .catch(error => alert('user does not exit'));
+  //  findAll('info')
+  //    .then(success => console.log('success = ', success))
+  //   .catch(error => alert(error));
 
-//  findAll('db', 'user')
-//    .then(success => alert('success = [{id: 1, name: kim , phone: 010-0000-0000 }]'))
-//   .catch(error => alert('user does not exit'));
+  // findAllKeys('info')
+  //   .then(success => console.log('success = ', success))
+  //   .catch(error => alert(error));
 
-// findAllKeys('db', 'user')
-//   .then(success => alert('success = [1]'))
-//   .catch(error => alert('user does not exit'));
+  // count('info')
+  //   .then(success => console.log('success = ', success))
+  //   .catch(error => alert(error));
 
-// count('db', 'user')
-//   .then(success => alert('success = 1'))
-//   .catch(error => alert('user does not exit'));
+  // update('info', {
+  //   name: 'kims-acount',
+  //   phone: '010-0000-0000',
+  //   id: 3,
+  // })
+  //   .then(success => console.log('update kims-acount success!! = ', success))
+  //   .catch(error => alert(error));
 
-// update('db', 'user', {
-//   name: 'kims-acount',
-//   phone: '010-0000-0000',
-//   id: 1,
-// })
-//   .then(success => alert('update kims-acount success!!'))
-//   .catch(error => alert('user does not exit'));
+  // deleteByKey('info', 'phone', '010-0000-0000')
+  //   .then(success => console.log('kims-acount delete success!! = ', success))
+  //   .catch(error => alert(error));
 
-// deleteByKey('db', 'user', 'phone', '010-0000-0000')
-//   .then(success => alert('kims-acount delete success!!'))
-//   .catch(error => alert('user does not exit'));
+  return <div>users!</div>;
+};
+
+ReactDOM.render(<Root />, document.getElementById('app'));

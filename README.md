@@ -15,16 +15,44 @@ Several quick start options are available:
 - Install with [yarn](https://yarnpkg.com/): `yarn add react-indexed-db-hooks`
 
 ## How to use
+- Project root init provide IndexedDBProvider.
+- Init initialState in databaseName, version
+- Init initialState in schemas indexedDB objectStores 
 
-import useIndexedDB in your project.
+```
+import {IndexedDBProvider, IndexedDBReducer} from './indexedDBProvider';
+
+<IndexedDBProvider
+  initialState={{databaseName: 'user', version: 1, schemas: [
+      {
+        schema: 'info',
+        autoIncrement: {keyPath: 'id', autoIncrement: true},
+        indexes: [
+          {name: 'name', keypath: 'name', options: {unique: false}},
+          {name: 'phone', keypath: 'phone', options: {unique: true}},
+        ],
+      },
+      {
+        schema: 'auth',
+        autoIncrement: {keyPath: 'id', autoIncrement: true},
+        indexes: [
+          {name: 'userId', keypath: 'userId', options: {unique: true}},
+          {name: 'password', keypath: 'password', options: {unique: false}},
+        ],
+      },
+    ]}}
+  reducer={IndexedDBReducer}
+>
+  // child component
+</IndexedDBProvider>
+```
+
+- import useIndexedDB in your project.
 
 ```
 import { useIndexedDB } from 'react-indexed-db-hooks';
 
 const {
-  createDatabase,
-  openDatabase,
-  createSchema,
   insert,
   findById,
   findByKey,
@@ -38,101 +66,80 @@ const {
 
 ```
 
-openDatabase :
-```
-openDatabase('db')
-  .then(success => alert('database open success !'))
-  .catch(e => alert('db does not exit..'))
-```
-
-createSchema :
-```
-createSchema('db', [
-  {
-    schema: 'user',
-    autoIncrement: {keyPath: 'id', autoIncrement: true},
-    indexes: [
-      {name: 'name', keypath: 'name', options: {unique: false}},
-      {name: 'phone', keypath: 'phone', options: {unique: true}},
-    ],
-  },
-])
-  .then(success => alert('user create success !'))
-  .catch(e => alert('oops! error..'));
- ```
-
 insert :
  ```
-insert('db', 'user', {name: 'kim' , phone: '010-0000-0000' })
-  .then(success => alert('success = {id: 1, name: 'kim' , phone: '010-0000-0000' }'))
-  .catch(error => alert('user does not exit'));
+insert('info', {name: 'Hudson', phone: '010-1111-1111' })
+  .then(success => {
+    consolel.log('success = ', success)
+  })
+  .catch(error => alert(error));
  ```
  
 findById :
  ```
-findById('db', 'user', 1)
-  .then(success => alert('success = {id: 1, name: 'kim' , phone: '010-0000-0000' }'))
-  .catch(error => alert('user does not exit'));
+findById('info', 1)
+    .then(success => console.log('success = ', success))
+    .catch(error => alert(error));
  ```
 
 findByKey :
  ```
-findByKey('db', 'user', 'phone', '010-0000-0000')
-  .then(success => alert('success = 1')
-  .catch(error => alert('user does not exit'));
+findByKey('info', 'phone', '010-0000-0000')
+  .then(success => console.log('success = ', success))
+  .catch(error => alert(error));
  ```
 
 findByValue :
 ```
-findByValue('db', 'user', 'phone', '010-0000-0000')
-  .then(success => alert('success = {id: 1, name: 'kim' , phone: '010-0000-0000' }'))
-  .catch(error => alert('user does not exit'));
+findByValue('info', 'phone', '010-0000-0000')
+  .then(success => console.log('success = ', success))
+  .catch(error => alert(error));
 ```
  
  findAll :
  ```
- findAll('db', 'user')
-   .then(success => alert('success = [{id: 1, name: 'kim' , phone: '010-0000-0000' }]'))
-  .catch(error => alert('user does not exit'));
+ findAll('info')
+  .then(success => console.log('success = ', success))
+  .catch(error => alert(error));
  ```
 
 findAllKeys :
 ```
-findAllKeys('db', 'user')
-  .then(success => alert('success = [1]'))
-  .catch(error => alert('user does not exit'));
+findAllKeys('info')
+  .then(success => console.log('success = ', success))
+  .catch(error => alert(error));
  ```
 
 count :
 ```
-count('db', 'user')
-  .then(success => alert('success = 1'))
-  .catch(error => alert('user does not exit'));
+count('info')
+  .then(success => console.log('success = ', success))
+  .catch(error => alert(error));
 ```
 
 update :
 ```
-update('db', 'user', {
-  name: 'kims-acount', 
+update('info', {
+  name: 'kims-acount',
   phone: '010-0000-0000',
-  id: 1,
+  id: 3,
 })
-  .then(success => alert('update kims-acount success!!'))
-  .catch(error => alert('user does not exit'));
+  .then(success => console.log('update kims-acount success!! = ', success))
+  .catch(error => alert(error));
 ```
 
 deleteByKey : 
 ```
-deleteByKey('db', 'user', 'phone', '010-0000-0000')
-  .then(success => alert('kims-acount delete success!!'))
-  .catch(error => alert('user does not exit'));
+deleteByKey('info', 'phone', '010-0000-0000')
+  .then(success => console.log('kims-acount delete success!! = ', success))
+  .catch(error => alert(error));
 ```
 
 ## TODOS
 - cursor
 - index
 - react context, consumer
-- <Query />
-- <Mutation />
+- Query
+- Mutation
 - error, abort, loading, success
 
