@@ -8,6 +8,16 @@ export const IndexedDBInitialState = {
   indexedDB: new indexedDB(),
   db: null,
   schemas: [],
+  transaction: {
+    isTransactionCall: false,
+    schema: '',
+    type: '',
+    data: null,
+    request: {
+      success: false,
+      error: false,
+    },
+  },
 };
 
 export const IndexedDBReducer = (state, action) => {
@@ -33,6 +43,18 @@ export const IndexedDBReducer = (state, action) => {
         IndexedDBInitialState,
       };
 
+    case 'setTransaction':
+      return {
+        ...state,
+        transaction: action.transaction,
+      };
+
+    case 'finishTransaction':
+      return {
+        ...state,
+        transaction: IndexedDBInitialState.transaction,
+      };
+
     default:
       return state;
   }
@@ -51,3 +73,20 @@ export const IndexedDBProvider = ({reducer, initialState, children}) => {
 };
 
 export const IndexedDBStateValue = () => useContext(IndexedDBContext);
+
+export function ObserveConsumer({children}) {
+  return (
+    <IndexedDBContext.Consumer>
+      {state => {
+        const {transaction} = state[0];
+        const {success, error} = transaction.request;
+
+        return children({
+          success,
+          error,
+          isTransactionCall: transaction.isTransactionCall,
+        });
+      }}
+    </IndexedDBContext.Consumer>
+  );
+}

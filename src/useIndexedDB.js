@@ -4,7 +4,35 @@ import {checkDatabase} from './utils';
 import {IndexedDBContext, IndexedDBStateValue} from './indexedDBProvider';
 
 export function useIndexedDB() {
-  const [state] = IndexedDBStateValue(IndexedDBContext);
+  const [state, dispatch] = IndexedDBStateValue(IndexedDBContext);
+
+  function setTransaction(request, schema, type, data) {
+    dispatch({
+      type: 'setTransaction',
+      transaction: {
+        ...state.transaction,
+        isTransactionCall: true,
+        schema: schema,
+        type: type,
+        date: data,
+      },
+    });
+  }
+
+  function finishTransaction(event) {
+    console.log(state.transaction);
+    dispatch({
+      type: 'setTransaction',
+      transaction: {
+        ...state.transaction,
+        isTransactionCall: true,
+        request: {
+          success: event.type === 'success' ? true : false,
+          error: event.type === 'error' ? true : false,
+        },
+      },
+    });
+  }
 
   const createDatabase = () => {
     const request = indexedDB.open(state.databaseName);
@@ -72,11 +100,15 @@ export function useIndexedDB() {
           .objectStore(schema);
         const request = transaction.add(data);
 
+        setTransaction(request, schema, 'insert', data);
+
         request.onsuccess = event => {
+          finishTransaction(event);
           resolve(true);
         };
 
         request.onerror = event => {
+          finishTransaction(event);
           reject(event.target.error);
         };
       });
@@ -260,6 +292,12 @@ export function useIndexedDB() {
         const transaction = state.db
           .transaction(schema, TRANSACTION_MODE.readwrite)
           .objectStore(schema);
+
+        setTransaction(transaction, schema, 'delete', {
+          index,
+          value,
+        });
+
         const transactionIndex = transaction.index(index);
         const request = transactionIndex.getKey(value);
 
@@ -274,10 +312,12 @@ export function useIndexedDB() {
           const deleteRequest = transaction.delete(key);
 
           deleteRequest.onsuccess = event => {
+            finishTransaction(event);
             resolve(true);
           };
 
           deleteRequest.onerror = event => {
+            finishTransaction(event);
             reject(event.target.error);
           };
         };
