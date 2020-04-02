@@ -45,9 +45,9 @@ export function useIndexedDB() {
       newVersion.onupgradeneeded = event => {
         const db = event.target.result;
 
-        metas.forEach(async meta => {
+        metas.forEach(meta => {
           if (!db.objectStoreNames.contains(meta.schema)) {
-            const objectStore = await db.createObjectStore(
+            const objectStore = db.createObjectStore(
               meta.schema,
               meta.autoIncrement,
             );
