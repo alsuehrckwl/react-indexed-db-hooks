@@ -8,7 +8,7 @@ import {useIndexedDB} from './useIndexedDB';
 import {useState} from 'react';
 import {useEffect} from 'react';
 
-function ObserveTransaction({
+export function ObserveTransaction({
   children,
   schema,
   index,
@@ -50,5 +50,3 @@ function ObserveTransaction({
     </ObserveConsumer>
   );
 }
-
-export default ObserveTransaction;
