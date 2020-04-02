@@ -14,7 +14,7 @@ Several quick start options are available:
 - Install with [npm](https://www.npmjs.com/): `npm install react-indexed-db-hooks`
 - Install with [yarn](https://yarnpkg.com/): `yarn add react-indexed-db-hooks`
 
-## reqirement
+## Reqirement
 - Need a higher react 16.8 version
 
 ## How to use
@@ -33,6 +33,7 @@ import {IndexedDBProvider, IndexedDBReducer} from './indexedDBProvider';
         indexes: [
           {name: 'name', keypath: 'name', options: {unique: false}},
           {name: 'phone', keypath: 'phone', options: {unique: true}},
+          {name: 'gender', keypath: 'gender', options: {unique: false}}
         ],
       },
       {
@@ -49,6 +50,32 @@ import {IndexedDBProvider, IndexedDBReducer} from './indexedDBProvider';
   // child component
 </IndexedDBProvider>
 ```
+
+<br/>
+
+- Use ObserveTransaction component (only insert, delete observation)
+- scheme : require
+- index : require
+- value : default null
+```
+<ObserveTransaction
+  schema="info"
+  index="gender"
+  value="male">
+  {({ result }) => {
+    if (!!result) {
+      return result.map((item, idx) => <div>
+        <p>name: {item.name}</p>
+        <p>phone: {item.phone}</p>
+      </div>);
+    } else {
+      return <div>empty users..</div>;
+    }
+  }}
+</ObserveTransaction>
+```
+
+<br/>
 
 - import useIndexedDB in your project.
 
@@ -71,7 +98,7 @@ const {
 
 insert :
  ```
-insert('info', {name: 'Hudson', phone: '010-1111-1111' })
+insert('info', {name: 'Hudson', phone: '010-1111-1111', gender: 'male' })
   .then(success => {
     consolel.log('success = ', success)
   })
@@ -125,6 +152,7 @@ update :
 update('info', {
   name: 'kims-acount',
   phone: '010-0000-0000',
+  gender: 'female',
   id: 3,
 })
   .then(success => console.log('update kims-acount success!! = ', success))

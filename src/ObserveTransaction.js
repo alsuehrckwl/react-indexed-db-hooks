@@ -12,7 +12,7 @@ export function ObserveTransaction({
   children,
   schema,
   index,
-  value,
+  value = null,
   loading = false,
   loadingComponent = null,
 }) {
@@ -22,7 +22,11 @@ export function ObserveTransaction({
 
   useEffect(() => {
     findAll(schema).then(success => {
-      setResult(success.filter(item => item[index] === value));
+      if (!!value) {
+        setResult(success.filter(item => item[index] === value));
+      } else {
+        setResult(success);
+      }
     });
   }, []);
 
