@@ -17,7 +17,7 @@
     "start": "parcel ./example/index.html --out-dir development",
     "test": "echo \"No test specified\"",
     "rollup": "rollup -c",
-    "build": "npm run rollup && npm version patch && npm publish"
+    "build": "npm run rollup && npm version patch"
   },
   "devDependencies": {
     "@babel/core": "^7.9.0",
