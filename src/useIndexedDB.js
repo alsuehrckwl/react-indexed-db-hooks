@@ -20,7 +20,6 @@ export function useIndexedDB() {
   }
 
   function finishTransaction(event) {
-    console.log(state.transaction);
     dispatch({
       type: 'setTransaction',
       transaction: {
@@ -327,7 +326,28 @@ export function useIndexedDB() {
         };
       });
     },
-    clear: () => {},
+    clear: schema => {
+      return new Promise((resolve, reject) => {
+        const validation = checkDatabase(state.db, schema);
+
+        if (validation.check) {
+          reject(validation.msg);
+        }
+
+        const transaction = state.db
+          .transaction(schema, TRANSACTION_MODE.readwrite)
+          .objectStore(schema)
+          .clear();
+
+        transaction.onsuccess = event => {
+          resolve(true);
+        };
+
+        transaction.onerror = event => {
+          reject(event.target.error);
+        };
+      });
+    },
     openCursor: () => {},
   };
 

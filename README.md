@@ -92,6 +92,7 @@ const {
   count,
   update,
   deleteByKey,
+  claer
 } = useIndexedDB();
 
 ```
@@ -166,11 +167,16 @@ deleteByKey('info', 'phone', '010-0000-0000')
   .catch(error => alert(error));
 ```
 
+clear : 
+```
+clear('info')
+  .then(success => console.log('info clear success!! = ', success))
+  .catch(error => alert(error));
+```
+
 ## TODOS
 - cursor
-- index
-- react context, consumer
-- Query
-- Mutation
+- create index, delete index
+- mutation
 - error, abort, loading, success
 
