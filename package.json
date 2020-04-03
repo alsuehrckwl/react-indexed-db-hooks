@@ -1,6 +1,6 @@
 {
   "name": "react-indexed-db-hooks",
-  "version": "1.2.2",
+  "version": "1.2.3",
   "description": "WebAPI IndexedDB + react with hooks = 💖",
   "main": "lib/index.js",
   "module": "lib/index.js",
