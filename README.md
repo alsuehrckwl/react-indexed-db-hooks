@@ -17,6 +17,12 @@ Several quick start options are available:
 ## Reqirement
 - Need a higher react 16.8 version
 
+## Development and demo
+- git clone https://github.com/alsuehrckwl/react-indexed-db-hooks.git
+- npm install or yarn
+- npm start or yarn start
+- open brower http://localhost:1234/
+
 ## How to use
 - Project root init provide IndexedDBProvider.
 - Init initialState in databaseName, version
@@ -53,11 +59,18 @@ import {IndexedDBProvider, IndexedDBReducer} from './indexedDBProvider';
 
 <br/>
 
-- Use ObserveTransaction component (only insert, delete observation)
-- scheme : require
-- index : require
-- value : default null
+- Use ObserveTransaction component (only insert, delete, clear observation)
 ```
+import { ObserveTransaction } from 'react-indexed-db-hooks';
+
+/*
+  scheme : require (string)
+  index : require (string)
+  value : default null (string | number)
+  loading : deafault false (boolean)
+  loadingComponent default null (Component)
+ */
+
 <ObserveTransaction
   schema="info"
   index="gender"
@@ -162,8 +175,22 @@ update('info', {
 
 deleteByKey : 
 ```
+deleteByKey('info', 1)
+  .then(success => console.log('key 1 is delete = ', success))
+  .catch(error => alert(error));
+```
+
+deleteByValue : 
+```
 deleteByKey('info', 'phone', '010-0000-0000')
   .then(success => console.log('kims-acount delete success!! = ', success))
+  .catch(error => alert(error));
+```
+
+deleteAllIndexMatchValue:
+```
+deleteAllIndexMatchValue('info', 'gender', 'male')
+  .then(success => console.log('male data all delete = ', success))
   .catch(error => alert(error));
 ```
 

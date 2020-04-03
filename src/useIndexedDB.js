@@ -6,15 +6,13 @@ import {IndexedDBContext, IndexedDBStateValue} from './indexedDBProvider';
 export function useIndexedDB() {
   const [state, dispatch] = IndexedDBStateValue(IndexedDBContext);
 
-  function setTransaction(request, schema, type, data) {
+  function setTransaction(schema) {
     dispatch({
       type: 'setTransaction',
       transaction: {
         ...state.transaction,
         isTransactionCall: true,
         schema: schema,
-        type: type,
-        date: data,
       },
     });
   }
@@ -94,12 +92,11 @@ export function useIndexedDB() {
   const transactions = {
     insert: (schema, data) => {
       return new Promise((resolve, reject) => {
+        setTransaction(schema);
         const transaction = state.db
           .transaction(schema, TRANSACTION_MODE.readwrite)
           .objectStore(schema);
         const request = transaction.add(data);
-
-        setTransaction(request, schema, 'insert', data);
 
         request.onsuccess = event => {
           finishTransaction(event);
@@ -280,7 +277,7 @@ export function useIndexedDB() {
         };
       });
     },
-    deleteByKey: (schema, index, value) => {
+    deleteByValue: (schema, index, value) => {
       return new Promise((resolve, reject) => {
         const validation = checkDatabase(state.db, schema);
 
@@ -288,14 +285,10 @@ export function useIndexedDB() {
           reject(validation.msg);
         }
 
+        setTransaction(schema);
         const transaction = state.db
           .transaction(schema, TRANSACTION_MODE.readwrite)
           .objectStore(schema);
-
-        setTransaction(transaction, schema, 'delete', {
-          index,
-          value,
-        });
 
         const transactionIndex = transaction.index(index);
         const request = transactionIndex.getKey(value);
@@ -322,8 +315,53 @@ export function useIndexedDB() {
         };
 
         request.onerror = event => {
+          finishTransaction(event);
           reject(event.target.error);
         };
+      });
+    },
+    deleteByKey: (schema, key) => {
+      return new Promise((resolve, reject) => {
+        const validation = checkDatabase(state.db, schema);
+
+        if (validation.check) {
+          reject(validation.msg);
+        }
+
+        setTransaction(schema);
+        const transaction = state.db
+          .transaction(schema, TRANSACTION_MODE.readwrite)
+          .objectStore(schema);
+
+        const request = transaction.delete(key);
+
+        request.onsuccess = event => {
+          finishTransaction(event);
+          resolve(true);
+        };
+
+        request.onerror = event => {
+          finishTransaction(event);
+          reject(event.target.error);
+        };
+      });
+    },
+    deleteAllIndexMatchValue: (schema, index, value) => {
+      return new Promise((resolve, reject) => {
+        function callback(cursor) {
+          if (typeof cursor === 'text') {
+            finishTransaction({type: 'error'});
+            reject(cursor);
+          }
+          if (cursor.value[index] === value) {
+            cursor.delete();
+          }
+        }
+        setTransaction(schema);
+        transactions.openCursor(schema, callback);
+
+        finishTransaction({type: 'success'});
+        resolve(true);
       });
     },
     clear: schema => {
@@ -334,6 +372,7 @@ export function useIndexedDB() {
           reject(validation.msg);
         }
 
+        setTransaction(schema);
         const transaction = state.db
           .transaction(schema, TRANSACTION_MODE.readwrite)
           .objectStore(schema)
@@ -341,14 +380,52 @@ export function useIndexedDB() {
 
         transaction.onsuccess = event => {
           resolve(true);
+          finishTransaction(event);
         };
 
         transaction.onerror = event => {
           reject(event.target.error);
+          finishTransaction(event);
         };
       });
     },
-    openCursor: () => {},
+    openCursor: (schema, callback = null) => {
+      return new Promise((resolve, reject) => {
+        const validation = checkDatabase(state.db, schema);
+
+        if (validation.check) {
+          reject(validation.msg);
+        }
+
+        const transaction = state.db
+          .transaction(schema, TRANSACTION_MODE.readwrite)
+          .objectStore(schema);
+        const requestCursor = transaction.openCursor();
+
+        requestCursor.onsuccess = event => {
+          const cursor = event.target.result;
+
+          if (cursor) {
+            if (!!callback) {
+              callback(cursor);
+              cursor.continue();
+            } else {
+              cursor.continue();
+            }
+          } else {
+            // no more results
+          }
+        };
+
+        requestCursor.onerror = event => {
+          if (!!callback) {
+            callback(event.target.error);
+          } else {
+            reject(event.target.error);
+          }
+        };
+      });
+    },
   };
 
   return {openDatabase, createSchema, ...transactions};

@@ -35,9 +35,11 @@ export function ObserveTransaction({
       {({success, error, isTransactionCall}) => {
         if (isTransactionCall && success) {
           findAll(schema).then(success => {
-            const data = success.filter(item => item[index] === value);
-            console.log(data);
-            setResult(data);
+            if (!!value) {
+              setResult(success.filter(item => item[index] === value));
+            } else {
+              setResult(success);
+            }
 
             dispatch({
               type: 'finishTransaction',

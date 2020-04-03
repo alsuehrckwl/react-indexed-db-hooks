@@ -1,7 +1,8 @@
-import React from 'react';
+import React, {useState} from 'react';
 import ReactDOM from 'react-dom';
 import {useIndexedDB} from './useIndexedDB';
 import {IndexedDBProvider, IndexedDBReducer} from './indexedDBProvider';
+import {ObserveTransaction} from './ObserveTransaction';
 
 const Root = () => {
   return (
@@ -14,8 +15,9 @@ const Root = () => {
             schema: 'info',
             autoIncrement: {keyPath: 'id', autoIncrement: true},
             indexes: [
-              {name: 'name', keypath: 'name', options: {unique: false}},
               {name: 'phone', keypath: 'phone', options: {unique: true}},
+              {name: 'name', keypath: 'name', options: {unique: false}},
+              {name: 'gender', keypath: 'gender', options: {unique: false}},
             ],
           },
           {
@@ -36,69 +38,169 @@ const Root = () => {
 };
 
 const Users = () => {
-  const {
-    createSchema,
-    insert,
-    findById,
-    findByKey,
-    findByValue,
-    findAll,
-    findAllKeys,
-    count,
-    update,
-    deleteByKey,
-  } = useIndexedDB();
+  const [info, setInfo] = useState({
+    name: '',
+    phone: '',
+    gender: 'male',
+  });
+  const [auth, setAuth] = useState({
+    userId: '',
+    password: '',
+  });
+  const {insert, deleteByKey, deleteAllIndexMatchValue, clear} = useIndexedDB();
 
-  // count: ƒ count()
-  // openCursor: ƒ openCursor()
-  // openKeyCursor: ƒ openKeyCursor()
-  // index: ƒ index()
-  // createIndex: ƒ createIndex()
-  // deleteIndex: ƒ deleteIndex()
+  function submit(e) {
+    e.preventDefault();
+    return;
+  }
 
-  // insert('info', {name: 'Hudson', phone: '010-1111-1111' })
-  //   .then(success => {
-  //     consolel.log('success = ', success)
-  //   })
-  //   .catch(error => alert(error));
+  function submitForm() {
+    insert('info', info)
+      .then(success => {
+        console.log('success = ', success);
+      })
+      .catch(error => alert(error));
+  }
 
-  // findById('info', 3)
-  //   .then(success => console.log('success = ', success))
-  //   .catch(error => alert(error));
+  function onChangeInfo(e) {
+    const name = e.target.name;
+    const value = e.target.value;
 
-  // findByKey('info', 'phone', '010-0000-0000')
-  //   .then(success => console.log('success = ', success))
-  //   .catch(error => alert(error));
+    setInfo({
+      ...info,
+      [name]: value,
+    });
+  }
 
-  // findByValue('info', 'phone', '010-0000-0000')
-  //   .then(success => console.log('success = ', success))
-  //   .catch(error => alert(error));
+  function deleteInfoItem(item) {
+    deleteByKey('info', item.id)
+      .then(success => console.log('success = ', success))
+      .catch(error => alert(error));
+  }
 
-  //  findAll('info')
-  //    .then(success => console.log('success = ', success))
-  //   .catch(error => alert(error));
+  function deleteGenderType(type) {
+    deleteAllIndexMatchValue('info', 'gender', type)
+      .then(success => {
+        console.log(success);
+      })
+      .catch(error => {
+        console.log(error);
+      });
+  }
 
-  // findAllKeys('info')
-  //   .then(success => console.log('success = ', success))
-  //   .catch(error => alert(error));
+  function clearAllData() {
+    clear('info');
+  }
 
-  // count('info')
-  //   .then(success => console.log('success = ', success))
-  //   .catch(error => alert(error));
-
-  // update('info', {
-  //   name: 'kims-acount',
-  //   phone: '010-0000-0000',
-  //   id: 3,
-  // })
-  //   .then(success => console.log('update kims-acount success!! = ', success))
-  //   .catch(error => alert(error));
-
-  // deleteByKey('info', 'phone', '010-0000-0000')
-  //   .then(success => console.log('kims-acount delete success!! = ', success))
-  //   .catch(error => alert(error));
-
-  return <div>users!</div>;
+  return (
+    <div>
+      <form
+        onSubmit={submit}
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          width: 200,
+          margin: 40,
+        }}
+      >
+        <input
+          value={info.name}
+          onChange={onChangeInfo}
+          name="name"
+          id="name"
+          placeholder="name"
+          style={{marginBottom: 8}}
+        />
+        <input
+          value={info.phone}
+          onChange={onChangeInfo}
+          name="phone"
+          id="phone"
+          placeholder="phone"
+          style={{marginBottom: 8}}
+        />
+        <select
+          name="gender"
+          id="gender"
+          value={info.gender}
+          onChange={onChangeInfo}
+          style={{marginBottom: 8}}
+        >
+          <option value="male">male</option>
+          <option value="female">female</option>
+        </select>
+        <button onClick={submitForm} style={{marginBottom: 8}}>
+          submit
+        </button>
+        <button
+          onClick={() => deleteGenderType('male')}
+          style={{marginBottom: 8}}
+        >
+          delete male
+        </button>
+        <button
+          onClick={() => deleteGenderType('female')}
+          style={{marginBottom: 8}}
+        >
+          delete female
+        </button>
+        <button onClick={clearAllData}>clear data</button>
+      </form>
+      <ul>
+        <ObserveTransaction schema="info" index="gender">
+          {({result}) => {
+            if (!!result) {
+              if (result.length > 0) {
+                return result.map((item, idx) => (
+                  <li
+                    key={`info-list-${idx}`}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      width: 500,
+                      marginBottom: 8,
+                      padding: 8,
+                      border: '1px solid #dedede',
+                    }}
+                  >
+                    <span
+                      style={{
+                        width: 100,
+                        marginRight: 24,
+                      }}
+                    >
+                      <small>name:</small> {item.name}
+                    </span>
+                    <span
+                      style={{
+                        width: 200,
+                        marginRight: 24,
+                      }}
+                    >
+                      <small>phone:</small> {item.phone}
+                    </span>
+                    <span
+                      style={{
+                        width: 130,
+                      }}
+                    >
+                      <small>gender:</small>{' '}
+                      {item.gender === 'male' ? '🙋‍♂️' : '🙋‍♀️'}
+                    </span>
+                    <button onClick={() => deleteInfoItem(item)}>x</button>
+                  </li>
+                ));
+              } else {
+                return <div>empty users..</div>;
+              }
+            } else {
+              return <div>empty users..</div>;
+            }
+          }}
+        </ObserveTransaction>
+      </ul>
+    </div>
+  );
 };
 
 ReactDOM.render(<Root />, document.getElementById('app'));

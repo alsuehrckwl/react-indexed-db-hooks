@@ -11,8 +11,6 @@ export const IndexedDBInitialState = {
   transaction: {
     isTransactionCall: false,
     schema: '',
-    type: '',
-    data: null,
     request: {
       success: false,
       error: false,
